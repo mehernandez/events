@@ -2,7 +2,7 @@
 module.exports = function(app) {
 
 // Event routes
-  var eventController = require('controllers/eventController');
+  var eventController = require('./api/controllers/eventController');
 
   // All events
   app.route('/events')

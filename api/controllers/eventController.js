@@ -4,7 +4,7 @@ const mariadb = require('mariadb');
 const pool = mariadb.createPool({host: 'mydb.com', user:'myUser', connectionLimit: 5});
 
 
-exports.list_all_tasks = function(req, res) {
+exports.list_all_events = function(req, res) {
     pool.getConnection()
     .then(conn => {
     
