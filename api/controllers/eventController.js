@@ -1,88 +1,100 @@
 'use strict';
 
-const mariadb = require('mariadb');
-const pool = mariadb.createPool({host: 'mydb.com', user:'myUser', connectionLimit: 5});
+const mysql = require('mysql');
+const credentials = {
+  host: 'localhost',
+  user: 'mario',
+  password: 'smbxboxm',
+  database: 'events'
+};
 
+// Get all events
+exports.list_all_events = function (req, res) {
 
-exports.list_all_events = function(req, res) {
-    pool.getConnection()
-    .then(conn => {
-    
-      conn.query("SELECT * from event")
-        .then((rows) => {
-          console.log(rows); //[ {val: 1}, meta: ... ]
-          conn.end()
-          res.json({success: true, data: rows})
-        })
-        .catch(err => {
-          conn.end();
-          res.json({success: false, msg: 'There is a problem getting events'})
-        })
-        
-    }).catch(err => {
-      //not connected
+  const con = mysql.createConnection(credentials);
+
+  con.connect(function (err) {
+    if (err) throw err;
+    con.query("SELECT * FROM events ORDER BY start ASC", function (err, result) {
+      if (err) {
+        console.log(err);
+        res.json({ success: false, msg: 'There is a problem getting events' });
+      } else {
+        res.json({ success: true, data: result });
+      }
     });
-};
-
-
-
-
-exports.create_a_task = function(req, res) {
-  var new_task = new Task(req.body);
-  new_task.save(function(err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
   });
 };
 
+// Get user events
+exports.list_events = function (req, res) {
 
-exports.read_a_task = function(req, res) {
-  Task.findById(req.params.taskId, function(err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
+  const con = mysql.createConnection(credentials);
+
+  con.connect(function (err) {
+    if (err) throw err;
+    con.query("SELECT * FROM events WHERE user_id = '" + req.params.userId + "' ORDER BY start ASC", function (err, result) {
+      if (err) {
+        console.log(err);
+        res.json({ success: false, msg: 'There is a problem getting events' });
+      } else {
+        res.json({ success: true, data: result });
+      }
+    });
   });
 };
 
+// Create event
+exports.create_event = function (req, res) {
 
-exports.update_a_task = function(req, res) {
-  Task.findOneAndUpdate({_id: req.params.taskId}, req.body, {new: true}, function(err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
+  const con = mysql.createConnection(credentials);
+
+  con.connect(function (err) {
+    if (err) throw err;
+    console.log("INSERT INTO events values (NULL,'" + req.body.name + "','" + req.body.category + "','" + req.body.place + "','" + req.body.address + "','" + req.body.start + "','" + req.body.end + "'," + req.body.virt + ",'" + req.params.userId + "')");
+    con.query("INSERT INTO events values (NULL,'" + req.body.name + "','" + req.body.category + "','" + req.body.place + "','" + req.body.address + "','" + req.body.start + "','" + req.body.end + "'," + req.body.virt + "," + req.params.userId + ")", function (err, result) {
+      if (err) {
+        console.log(err);
+        res.json({ success: false, msg: 'There is a problem getting events' });
+      } else {
+        res.json({ success: true });
+      }
+    });
   });
 };
 
+// Edit event
+exports.edit_event = function (req, res) {
 
-exports.delete_a_task = function(req, res) {
+  const con = mysql.createConnection(credentials);
 
-
-  Task.remove({
-    _id: req.params.taskId
-  }, function(err, task) {
-    if (err)
-      res.send(err);
-    res.json({ message: 'Task successfully deleted' });
+  con.connect(function (err) {
+    if (err) throw err;
+    con.query("UPDATE events SET name = '" + req.body.name + "', category = '" + req.body.category + "', place = '" + req.body.place + "', address = '" + req.body.address + "', start = '" + req.body.start + "', end = '" + req.body.end + "', virt = " + req.body.virt + " WHERE event_id = " + req.params.eventId + "", function (err, result) {
+      if (err) {
+        console.log(err);
+        res.json({ success: false, msg: 'There is a problem editing the event' });
+      } else {
+        res.json({ success: true });
+      }
+    });
   });
 };
 
-/*
-conn.query("SELECT 1 as val")
-.then((rows) => {
-  console.log(rows); //[ {val: 1}, meta: ... ]
-  return conn.query("INSERT INTO myTable value (?, ?)", [1, "mariadb"]);
-})
-.then((res) => {
-  console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-  conn.end();
-})
-.catch(err => {
-  //handle error
-  conn.end();
-})
+// Delete event
+exports.delete_event = function (req, res) {
 
-}).catch(err => {
-//not connected
-});
-*/
+  const con = mysql.createConnection(credentials);
+
+  con.connect(function (err) {
+    if (err) throw err;
+    con.query("DELETE FROM events WHERE event_id = '" + req.params.eventId + "'", function (err, result) {
+      if (err) {
+        console.log(err);
+        res.json({ success: false, msg: 'There is a problem deleting the event' });
+      } else {
+        res.json({ success: true });
+      }
+    });
+  });
+};

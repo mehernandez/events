@@ -1,14 +1,19 @@
 var bodyParser = require('body-parser'),
 express = require('express'),
+cors = require('cors'),
+path = require('path'),
+routes = require('./api/routes'),
 app = express(),
-port = process.env.PORT || 3000;
-  
+port = process.env.PORT || 8080;
+
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
   
-  
-var routes = require('./api/routes'); //importing route
-routes(app); //register the route
+routes(app);
+
+// UI
+app.use(express.static(path.resolve(__dirname, 'ui')));
 
 app.listen(port);
 
