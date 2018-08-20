@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 routes(app);
 
 // UI
-app.use(express.static(path.resolve(__dirname, 'ui')));
+app.use(express.static(path.resolve(__dirname, 'ui/events_ui/build')));
 
 app.listen(port);
 
